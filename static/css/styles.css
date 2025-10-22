@@ -1,0 +1,45 @@
+/* Additional global styles - base styles are in base.html */
+
+.btn {
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: var(--primary-green);
+    color: var(--white);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--light-green);
+    outline: 2px solid var(--primary-green);
+    outline-offset: 2px;
+}
+
+.btn-secondary {
+    background-color: var(--medium-gray);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--dark-gray);
+    color: var(--white);
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: var(--white);
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+    background-color: #d32f2f;
+}

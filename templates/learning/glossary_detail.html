@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ term.guarani_word }} - Glossary{% endblock %}
+
+{% block content %}
+<style>
+    .detail-card {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .detail-header {
+        border-bottom: 2px solid var(--medium-gray);
+        padding-bottom: calc(var(--spacing-unit) * 3);
+        margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .term-main {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-green);
+        margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .detail-section {
+        margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .detail-value {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: calc(var(--spacing-unit) * 2);
+        margin-top: calc(var(--spacing-unit) * 4);
+        flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+        background-color: var(--medium-gray);
+        color: var(--text-primary);
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background-color: var(--dark-gray);
+        color: var(--white);
+    }
+
+    .btn-danger {
+        background-color: #f44336;
+        color: var(--white);
+    }
+
+    .btn-danger:hover,
+    .btn-danger:focus {
+        background-color: #d32f2f;
+    }
+
+    .audio-player {
+        display: flex;
+        align-items: center;
+        gap: calc(var(--spacing-unit) * 2);
+    }
+</style>
+
+<div class="detail-card">
+    <div class="detail-header">
+        <div class="term-main">{{ term.guarani_word }}</div>
+        {% if term.pronunciation %}
+        <div style="font-style: italic; color: var(--text-secondary); font-size: 1.2rem;">
+            [{{ term.pronunciation }}]
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-label">Spanish Translation</div>
+        <div class="detail-value">{{ term.spanish_translation }}</div>
+    </div>
+
+    {% if term.english_translation %}
+    <div class="detail-section">
+        <div class="detail-label">English Translation</div>
+        <div class="detail-value">{{ term.english_translation }}</div>
+    </div>
+    {% endif %}
+
+    {% if term.audio_file %}
+    <div class="detail-section">
+        <div class="detail-label">Pronunciation Audio</div>
+        <div class="audio-player">
+            <audio controls aria-label="Pronunciation audio for {{ term.guarani_word }}">
+                <source src="{{ term.audio_file.url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if term.example_sentence_guarani %}
+    <div class="detail-section">
+        <div class="detail-label">Example Sentence (Guarani)</div>
+        <div class="detail-value" style="font-style: italic;">{{ term.example_sentence_guarani }}</div>
+    </div>
+    {% endif %}
+
+    {% if term.example_sentence_spanish %}
+    <div class="detail-section">
+        <div class="detail-label">Example Sentence (Spanish)</div>
+        <div class="detail-value">{{ term.example_sentence_spanish }}</div>
+    </div>
+    {% endif %}
+
+    {% if term.category %}
+    <div class="detail-section">
+        <div class="detail-label">Category</div>
+        <div class="detail-value">{{ term.category }}</div>
+    </div>
+    {% endif %}
+
+    <div class="detail-section">
+        <div class="detail-label">Difficulty Level</div>
+        <div class="detail-value" style="text-transform: capitalize;">{{ term.difficulty_level }}</div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/glossary/" class="btn btn-secondary" aria-label="Back to glossary">← Back to Glossary</a>
+        <a href="/glossary/{{ term.id }}/edit/" class="btn btn-primary" aria-label="Edit this term">✏️ Edit</a>
+        <a href="/glossary/{{ term.id }}/delete/" class="btn btn-danger" aria-label="Delete this term">🗑️ Delete</a>
+    </div>
+</div>
+
+{% endblock %}

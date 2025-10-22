@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Lessons - Guarani Learning{% endblock %}
+
+{% block content %}
+<style>
+    .filter-bar {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 2);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: calc(var(--spacing-unit) * 3);
+        display: flex;
+        gap: calc(var(--spacing-unit) * 2);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+</style>
+
+<h1>Guarani Lessons</h1>
+
+<form method="get" class="filter-bar">
+    <label for="difficulty" class="form-label">Filter by Difficulty:</label>
+    <select id="difficulty" name="difficulty" class="form-select" style="width: auto;" aria-label="Filter lessons by difficulty">
+        <option value="">All Levels</option>
+        <option value="beginner" {% if selected_difficulty == 'beginner' %}selected{% endif %}>Beginner</option>
+        <option value="intermediate" {% if selected_difficulty == 'intermediate' %}selected{% endif %}>Intermediate</option>
+        <option value="advanced" {% if selected_difficulty == 'advanced' %}selected{% endif %}>Advanced</option>
+    </select>
+    <button type="submit" class="btn btn-primary" style="padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);">Filter</button>
+</form>
+
+{% if lessons %}
+<div class="lessons-grid">
+    {% for lesson in lessons %}
+    <a href="/lessons/{{ lesson.id }}/" class="lesson-card" aria-label="View lesson {{ lesson.title }}">
+        {% if lesson.cover_image %}
+        <img src="{{ lesson.cover_image.url }}" alt="{{ lesson.title }}" class="lesson-cover" style="object-fit: cover;">
+        {% else %}
+        <div class="lesson-cover" aria-hidden="true">📚</div>
+        {% endif %}
+        <div class="lesson-content">
+            <h2 class="lesson-title">{{ lesson.title }}</h2>
+            <p class="lesson-description">{{ lesson.description|truncatewords:20 }}</p>
+            <div class="lesson-meta">
+                <span class="difficulty-badge difficulty-{{ lesson.difficulty_level }}">
+                    {{ lesson.difficulty_level }}
+                </span>
+                <span>⏱️ {{ lesson.estimated_duration }} min</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon" aria-hidden="true">📖</div>
+    <p>No lessons found. Try adjusting your filters.</p>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} - Guarani Learning{% endblock %}
+
+{% block content %}
+<style>
+    .lesson-header {
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+        color: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .lesson-header h1 {
+        font-size: 2rem;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .lesson-info {
+        display: flex;
+        gap: calc(var(--spacing-unit) * 3);
+        flex-wrap: wrap;
+    }
+
+    .content-block {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .content-block h3 {
+        color: var(--primary-green);
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .vocabulary-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .vocabulary-item {
+        padding: calc(var(--spacing-unit) * 2);
+        background-color: var(--light-gray);
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--primary-green);
+    }
+
+    .vocab-word {
+        font-weight: bold;
+        color: var(--primary-green);
+        margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .exercises-section {
+        margin-top: calc(var(--spacing-unit) * 4);
+    }
+
+    .exercise-card {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 3);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: calc(var(--spacing-unit) * 2);
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+    .exercise-card:hover,
+    .exercise-card:focus {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+        outline: 2px solid var(--primary-blue);
+        outline-offset: 2px;
+    }
+
+    .media-content img {
+        max-width: 100%;
+        border-radius: var(--border-radius);
+        margin: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .media-content audio {
+        width: 100%;
+        margin: calc(var(--spacing-unit) * 2) 0;
+    }
+</style>
+
+<a href="/lessons/" class="btn btn-secondary" style="margin-bottom: calc(var(--spacing-unit) * 2);" aria-label="Back to lessons">
+    ← Back to Lessons
+</a>
+
+<div class="lesson-header">
+    <h1>{{ lesson.title }}</h1>
+    <p>{{ lesson.description }}</p>
+    <div class="lesson-info">
+        <span class="difficulty-badge difficulty-{{ lesson.difficulty_level }}">
+            {{ lesson.difficulty_level }}
+        </span>
+        <span>⏱️ {{ lesson.estimated_duration }} minutes</span>
+    </div>
+</div>
+
+{% for block in content_blocks %}
+<div class="content-block">
+    {% if block.title %}
+    <h3>{{ block.title }}</h3>
+    {% endif %}
+
+    {% if block.text_content %}
+    <div>{{ block.text_content|linebreaks }}</div>
+    {% endif %}
+
+    <div class="media-content">
+        {% if block.audio_file %}
+        <audio controls aria-label="Audio for {{ block.title }}">
+            <source src="{{ block.audio_file.url }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        {% endif %}
+
+        {% if block.image_file %}
+        <img src="{{ block.image_file.url }}" alt="{{ block.title }}" loading="lazy">
+        {% endif %}
+
+        {% if block.video_url %}
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+            <iframe src="{{ block.video_url }}"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                    frameborder="0"
+                    allowfullscreen
+                    title="{{ block.title }}">
+            </iframe>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if block.vocabulary_terms.all %}
+    <div class="vocabulary-list">
+        {% for term in block.vocabulary_terms.all %}
+        <div class="vocabulary-item">
+            <div class="vocab-word">{{ term.guarani_word }}</div>
+            <div>{{ term.spanish_translation }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if exercises %}
+<div class="exercises-section">
+    <h2 class="section-title">Practice Exercises</h2>
+    {% for exercise in exercises %}
+    <a href="/exercises/{{ exercise.id }}/" class="exercise-card" aria-label="Start exercise {{ exercise.title }}">
+        <h3>{{ exercise.title }}</h3>
+        <p>{{ exercise.instructions|truncatewords:20 }}</p>
+        <div style="margin-top: calc(var(--spacing-unit) * 2); color: var(--text-secondary);">
+            📝 {{ exercise.questions.count }} question{{ exercise.questions.count|pluralize }}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

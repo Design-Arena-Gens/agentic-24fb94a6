@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ term.guarani_word }} - Glossary{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-card {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .confirm-message {
+        font-size: 1.2rem;
+        margin-bottom: calc(var(--spacing-unit) * 3);
+        color: var(--text-primary);
+    }
+
+    .term-info {
+        background-color: var(--light-gray);
+        padding: calc(var(--spacing-unit) * 3);
+        border-radius: var(--border-radius);
+        margin: calc(var(--spacing-unit) * 3) 0;
+    }
+</style>
+
+<div class="confirm-card">
+    <div class="warning-icon" aria-hidden="true">⚠️</div>
+    <h1>Confirm Deletion</h1>
+
+    <p class="confirm-message">
+        Are you sure you want to delete this glossary term?
+    </p>
+
+    <div class="term-info">
+        <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-green); margin-bottom: calc(var(--spacing-unit) * 1);">
+            {{ term.guarani_word }}
+        </div>
+        <div style="color: var(--text-secondary);">
+            {{ term.spanish_translation }}
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions" style="justify-content: center;">
+            <a href="/glossary/{{ term.id }}/" class="btn btn-secondary" aria-label="Cancel deletion">Cancel</a>
+            <button type="submit" class="btn btn-danger" aria-label="Confirm deletion">Delete</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

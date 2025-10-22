@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Guarani Learning{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: calc(var(--spacing-unit) * 3);
+        margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .stat-card {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 3);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover,
+    .stat-card:focus-within {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-green);
+        margin: calc(var(--spacing-unit) * 1) 0;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin: calc(var(--spacing-unit) * 4) 0 calc(var(--spacing-unit) * 2);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+        border-radius: 2px;
+    }
+
+    .lessons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: calc(var(--spacing-unit) * 3);
+    }
+
+    .lesson-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-decoration: none;
+        color: var(--text-primary);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .lesson-card:hover,
+    .lesson-card:focus {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+        outline: 2px solid var(--primary-blue);
+        outline-offset: 2px;
+    }
+
+    .lesson-cover {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(135deg, var(--light-green), var(--light-blue));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
+
+    .lesson-content {
+        padding: calc(var(--spacing-unit) * 3);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .lesson-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .lesson-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+        flex: 1;
+    }
+
+    .lesson-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .difficulty-badge {
+        padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+        border-radius: calc(var(--border-radius) / 2);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .difficulty-beginner {
+        background-color: var(--light-green);
+        color: var(--white);
+    }
+
+    .difficulty-intermediate {
+        background-color: var(--light-blue);
+        color: var(--white);
+    }
+
+    .difficulty-advanced {
+        background-color: #ff9800;
+        color: var(--white);
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: var(--medium-gray);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-green), var(--primary-blue));
+        transition: width 0.3s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: calc(var(--spacing-unit) * 6);
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .lessons-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<h1>Dashboard</h1>
+
+<div class="dashboard-grid">
+    <div class="stat-card" role="article" aria-label="Total lessons statistic">
+        <div class="stat-label">Total Lessons</div>
+        <div class="stat-number">{{ total_lessons }}</div>
+    </div>
+
+    <div class="stat-card" role="article" aria-label="Completed lessons statistic">
+        <div class="stat-label">Completed</div>
+        <div class="stat-number">{{ completed_lessons }}</div>
+    </div>
+
+    <div class="stat-card" role="article" aria-label="Vocabulary terms statistic">
+        <div class="stat-label">Vocabulary Terms</div>
+        <div class="stat-number">{{ total_vocabulary }}</div>
+    </div>
+
+    <div class="stat-card" role="article" aria-label="Progress percentage">
+        <div class="stat-label">Progress</div>
+        <div class="stat-number">{{ completion_percentage }}%</div>
+    </div>
+</div>
+
+<div class="progress-bar" role="progressbar" aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="Overall learning progress">
+    <div class="progress-fill" style="width: {{ completion_percentage }}%;"></div>
+</div>
+
+{% if in_progress_lessons %}
+<h2 class="section-title">Continue Learning</h2>
+<div class="lessons-grid">
+    {% for progress in in_progress_lessons %}
+    <a href="/lessons/{{ progress.lesson.id }}/" class="lesson-card" aria-label="Continue lesson {{ progress.lesson.title }}">
+        <div class="lesson-cover" aria-hidden="true">📚</div>
+        <div class="lesson-content">
+            <h3 class="lesson-title">{{ progress.lesson.title }}</h3>
+            <p class="lesson-description">{{ progress.lesson.description|truncatewords:15 }}</p>
+            <div class="lesson-meta">
+                <span class="difficulty-badge difficulty-{{ progress.lesson.difficulty_level }}">
+                    {{ progress.lesson.difficulty_level }}
+                </span>
+                <span>⏱️ {{ progress.lesson.estimated_duration }} min</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="section-title">Recent Lessons</h2>
+{% if recent_lessons %}
+<div class="lessons-grid">
+    {% for lesson in recent_lessons %}
+    <a href="/lessons/{{ lesson.id }}/" class="lesson-card" aria-label="Start lesson {{ lesson.title }}">
+        <div class="lesson-cover" aria-hidden="true">📖</div>
+        <div class="lesson-content">
+            <h3 class="lesson-title">{{ lesson.title }}</h3>
+            <p class="lesson-description">{{ lesson.description|truncatewords:15 }}</p>
+            <div class="lesson-meta">
+                <span class="difficulty-badge difficulty-{{ lesson.difficulty_level }}">
+                    {{ lesson.difficulty_level }}
+                </span>
+                <span>⏱️ {{ lesson.estimated_duration }} min</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon" aria-hidden="true">📚</div>
+    <p>No lessons available yet. Check back soon!</p>
+</div>
+{% endif %}
+
+{% endblock %}

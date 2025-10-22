@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Guarani Language Learning{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        :root {
+            --primary-green: #4CAF50;
+            --light-green: #81C784;
+            --primary-blue: #2196F3;
+            --light-blue: #64B5F6;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --medium-gray: #E0E0E0;
+            --dark-gray: #424242;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --spacing-unit: 8px;
+            --border-radius: 8px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--light-gray);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: var(--white);
+            padding: calc(var(--spacing-unit) * 2) 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 calc(var(--spacing-unit) * 2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: var(--white);
+        }
+
+        .nav {
+            display: flex;
+            gap: calc(var(--spacing-unit) * 3);
+        }
+
+        .nav-link {
+            color: var(--white);
+            text-decoration: none;
+            padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            outline: 2px solid var(--white);
+            outline-offset: 2px;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2);
+        }
+
+        /* Chatbot floating button */
+        .chatbot-button {
+            position: fixed;
+            bottom: calc(var(--spacing-unit) * 3);
+            right: calc(var(--spacing-unit) * 3);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-button:hover,
+        .chatbot-button:focus {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+            outline: 3px solid var(--primary-blue);
+            outline-offset: 3px;
+        }
+
+        /* Chatbot modal */
+        .chatbot-modal {
+            display: none;
+            position: fixed;
+            bottom: calc(var(--spacing-unit) * 12);
+            right: calc(var(--spacing-unit) * 3);
+            width: 400px;
+            max-width: calc(100vw - calc(var(--spacing-unit) * 6));
+            height: 500px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-hover);
+            flex-direction: column;
+            z-index: 1001;
+        }
+
+        .chatbot-modal.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: var(--white);
+            padding: calc(var(--spacing-unit) * 2);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: calc(var(--spacing-unit) * 1);
+            line-height: 1;
+        }
+
+        .chatbot-close:hover,
+        .chatbot-close:focus {
+            opacity: 0.8;
+            outline: 2px solid var(--white);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: calc(var(--spacing-unit) * 2);
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--spacing-unit) * 2);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: calc(var(--spacing-unit) * 2);
+            border-radius: var(--border-radius);
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--light-blue);
+            color: var(--white);
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background-color: var(--light-green);
+            color: var(--white);
+        }
+
+        .chatbot-input-container {
+            padding: calc(var(--spacing-unit) * 2);
+            border-top: 1px solid var(--medium-gray);
+            display: flex;
+            gap: calc(var(--spacing-unit) * 1);
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: calc(var(--spacing-unit) * 2);
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .chatbot-input:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        .chatbot-send {
+            padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .chatbot-send:hover,
+        .chatbot-send:focus {
+            background-color: var(--light-blue);
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: calc(var(--spacing-unit) * 1);
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: calc(var(--spacing-unit) * 2);
+            }
+
+            .chatbot-modal {
+                right: calc(var(--spacing-unit) * 2);
+                width: calc(100vw - calc(var(--spacing-unit) * 4));
+            }
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: calc(var(--spacing-unit) * 3);
+        }
+
+        .alert {
+            padding: calc(var(--spacing-unit) * 2);
+            border-radius: var(--border-radius);
+            margin-bottom: calc(var(--spacing-unit) * 2);
+        }
+
+        .alert-success {
+            background-color: var(--light-green);
+            color: var(--white);
+        }
+
+        .alert-error {
+            background-color: #ef5350;
+            color: var(--white);
+        }
+    </style>
+</head>
+<body>
+    <header class="header" role="banner">
+        <div class="header-container">
+            <a href="/" class="logo" aria-label="Home">🇵🇾 Guarani Learning</a>
+            <nav class="nav" role="navigation">
+                <a href="/" class="nav-link" aria-label="Dashboard">Dashboard</a>
+                <a href="/lessons/" class="nav-link" aria-label="Lessons">Lessons</a>
+                <a href="/glossary/" class="nav-link" aria-label="Glossary">Glossary</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" role="main">
+        {% if messages %}
+        <div class="messages" role="alert" aria-live="polite">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- AI Chatbot -->
+    <button class="chatbot-button"
+            id="chatbot-toggle"
+            aria-label="Open Guarani teacher chatbot"
+            aria-expanded="false"
+            aria-controls="chatbot-modal">
+        💬
+    </button>
+
+    <div class="chatbot-modal" id="chatbot-modal" role="dialog" aria-labelledby="chatbot-title" aria-modal="true">
+        <div class="chatbot-header">
+            <h2 id="chatbot-title">Guarani Teacher 🇵🇾</h2>
+            <button class="chatbot-close" id="chatbot-close" aria-label="Close chatbot">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages" role="log" aria-live="polite" aria-atomic="false"></div>
+        <div class="chatbot-input-container">
+            <input type="text"
+                   class="chatbot-input"
+                   id="chatbot-input"
+                   placeholder="Ask me anything about Guarani..."
+                   aria-label="Chat message input">
+            <button class="chatbot-send" id="chatbot-send" aria-label="Send message">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Chatbot functionality
+        let sessionId = localStorage.getItem('chatbot_session') || '';
+
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotModal = document.getElementById('chatbot-modal');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+
+        chatbotToggle.addEventListener('click', () => {
+            const isActive = chatbotModal.classList.toggle('active');
+            chatbotToggle.setAttribute('aria-expanded', isActive);
+            if (isActive && !sessionId) {
+                loadChatHistory();
+            }
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotModal.classList.remove('active');
+            chatbotToggle.setAttribute('aria-expanded', 'false');
+        });
+
+        async function sendMessage() {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            chatbotInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                sessionId = data.session_id;
+                localStorage.setItem('chatbot_session', sessionId);
+                addMessage(data.response, 'assistant');
+            } catch (error) {
+                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            }
+        }
+
+        function addMessage(text, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.textContent = text;
+            messageDiv.setAttribute('role', role === 'user' ? 'log' : 'status');
+            chatbotMessages.appendChild(messageDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        async function loadChatHistory() {
+            if (!sessionId) {
+                addMessage("Mba'éichapa! I'm your Guarani teacher. How can I help you learn today?", 'assistant');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/chat/history/${sessionId}/`);
+                const messages = await response.json();
+                messages.forEach(msg => {
+                    if (msg.role !== 'system') {
+                        addMessage(msg.message, msg.role);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        chatbotSend.addEventListener('click', sendMessage);
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Keyboard navigation for modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && chatbotModal.classList.contains('active')) {
+                chatbotModal.classList.remove('active');
+                chatbotToggle.setAttribute('aria-expanded', 'false');
+                chatbotToggle.focus();
+            }
+        });
+    </script>
+</body>
+</html>

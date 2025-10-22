@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exercise.title }} - Exercise{% endblock %}
+
+{% block content %}
+<style>
+    .exercise-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .exercise-header {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .question-card {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .question-number {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+        color: var(--white);
+        padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+        border-radius: calc(var(--border-radius) / 2);
+        font-weight: bold;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .question-text {
+        font-size: 1.2rem;
+        margin-bottom: calc(var(--spacing-unit) * 3);
+        color: var(--text-primary);
+    }
+
+    .question-media {
+        margin: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .question-media img {
+        max-width: 100%;
+        border-radius: var(--border-radius);
+    }
+
+    .answer-options {
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .answer-option {
+        display: flex;
+        align-items: center;
+        padding: calc(var(--spacing-unit) * 2);
+        border: 2px solid var(--medium-gray);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .answer-option:hover {
+        border-color: var(--primary-blue);
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+
+    .answer-option input[type="radio"] {
+        margin-right: calc(var(--spacing-unit) * 2);
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .answer-option:focus-within {
+        outline: 2px solid var(--primary-blue);
+        outline-offset: 2px;
+    }
+
+    .fill-blank-input {
+        width: 100%;
+        padding: calc(var(--spacing-unit) * 2);
+        border: 2px solid var(--medium-gray);
+        border-radius: var(--border-radius);
+        font-size: 1.1rem;
+    }
+
+    .fill-blank-input:focus {
+        outline: 2px solid var(--primary-blue);
+        outline-offset: 2px;
+        border-color: var(--primary-blue);
+    }
+
+    .submit-section {
+        text-align: center;
+        margin-top: calc(var(--spacing-unit) * 4);
+    }
+
+    .result-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .result-modal.active {
+        display: flex;
+    }
+
+    .result-content {
+        background: var(--white);
+        padding: calc(var(--spacing-unit) * 4);
+        border-radius: var(--border-radius);
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .result-score {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin: calc(var(--spacing-unit) * 3) 0;
+    }
+
+    .result-item {
+        padding: calc(var(--spacing-unit) * 2);
+        border-radius: var(--border-radius);
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .result-correct {
+        background-color: rgba(76, 175, 80, 0.1);
+        border-left: 4px solid var(--primary-green);
+    }
+
+    .result-incorrect {
+        background-color: rgba(244, 67, 54, 0.1);
+        border-left: 4px solid #f44336;
+    }
+</style>
+
+<div class="exercise-container">
+    <a href="/lessons/{{ exercise.lesson.id }}/" class="btn btn-secondary" style="margin-bottom: calc(var(--spacing-unit) * 2);" aria-label="Back to lesson">
+        ← Back to Lesson
+    </a>
+
+    <div class="exercise-header">
+        <h1>{{ exercise.title }}</h1>
+        <p>{{ exercise.instructions }}</p>
+    </div>
+
+    <form id="exercise-form">
+        {% for question in questions %}
+        <div class="question-card">
+            <div class="question-number" role="status">Question {{ forloop.counter }} of {{ questions|length }}</div>
+            <div class="question-text">{{ question.question_text }}</div>
+
+            <div class="question-media">
+                {% if question.audio_file %}
+                <audio controls style="width: 100%;" aria-label="Audio for question {{ forloop.counter }}">
+                    <source src="{{ question.audio_file.url }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                {% endif %}
+
+                {% if question.image_file %}
+                <img src="{{ question.image_file.url }}" alt="Question {{ forloop.counter }} image" loading="lazy">
+                {% endif %}
+            </div>
+
+            {% if question.question_type == 'multiple_choice' %}
+            <div class="answer-options" role="radiogroup" aria-label="Answer options for question {{ forloop.counter }}">
+                {% for choice in question.choices.all %}
+                <label class="answer-option">
+                    <input type="radio"
+                           name="question_{{ question.id }}"
+                           value="{{ choice.choice_text }}"
+                           data-question-id="{{ question.id }}"
+                           required
+                           aria-label="Option {{ forloop.counter }}: {{ choice.choice_text }}">
+                    <span>{{ choice.choice_text }}</span>
+                </label>
+                {% endfor %}
+            </div>
+
+            {% elif question.question_type == 'fill_blank' %}
+            <input type="text"
+                   name="question_{{ question.id }}"
+                   class="fill-blank-input"
+                   data-question-id="{{ question.id }}"
+                   placeholder="Type your answer here..."
+                   required
+                   aria-label="Answer input for question {{ forloop.counter }}">
+
+            {% elif question.question_type == 'true_false' %}
+            <div class="answer-options" role="radiogroup" aria-label="True or False for question {{ forloop.counter }}">
+                <label class="answer-option">
+                    <input type="radio"
+                           name="question_{{ question.id }}"
+                           value="True"
+                           data-question-id="{{ question.id }}"
+                           required
+                           aria-label="True">
+                    <span>True</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio"
+                           name="question_{{ question.id }}"
+                           value="False"
+                           data-question-id="{{ question.id }}"
+                           required
+                           aria-label="False">
+                    <span>False</span>
+                </label>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="submit-section">
+            <button type="submit" class="btn btn-primary" style="font-size: 1.2rem; padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);" aria-label="Submit exercise answers">
+                Submit Answers
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="result-modal" id="result-modal" role="dialog" aria-labelledby="result-title" aria-modal="true">
+    <div class="result-content">
+        <h2 id="result-title">Exercise Results</h2>
+        <div class="result-score" id="result-score" aria-live="polite"></div>
+        <div id="result-details"></div>
+        <div style="text-align: center; margin-top: calc(var(--spacing-unit) * 3);">
+            <a href="/lessons/{{ exercise.lesson.id }}/" class="btn btn-primary" aria-label="Return to lesson">
+                Return to Lesson
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('exercise-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const answers = [];
+
+        // Collect all answers
+        const inputs = document.querySelectorAll('[data-question-id]');
+        inputs.forEach(input => {
+            const questionId = input.getAttribute('data-question-id');
+            let answer = '';
+
+            if (input.type === 'radio' && input.checked) {
+                answer = input.value;
+            } else if (input.type === 'text') {
+                answer = input.value;
+            }
+
+            if (answer && !answers.find(a => a.question_id === questionId)) {
+                answers.push({
+                    question_id: questionId,
+                    answer: answer
+                });
+            }
+        });
+
+        try {
+            const response = await fetch('/api/exercises/{{ exercise.id }}/submit/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ answers: answers })
+            });
+
+            const result = await response.json();
+            displayResults(result);
+        } catch (error) {
+            alert('Error submitting exercise. Please try again.');
+        }
+    });
+
+    function displayResults(result) {
+        const scoreElement = document.getElementById('result-score');
+        const detailsElement = document.getElementById('result-details');
+
+        const color = result.percentage >= 70 ? 'var(--primary-green)' : result.percentage >= 50 ? '#ff9800' : '#f44336';
+        scoreElement.innerHTML = `<span style="color: ${color}">${result.percentage}%</span>`;
+        scoreElement.innerHTML += `<div style="font-size: 1rem; color: var(--text-secondary); margin-top: calc(var(--spacing-unit) * 2);">${result.earned_points} / ${result.total_points} points</div>`;
+
+        detailsElement.innerHTML = '';
+        result.results.forEach((item, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `result-item ${item.is_correct ? 'result-correct' : 'result-incorrect'}`;
+            itemDiv.innerHTML = `
+                <strong>Question ${index + 1}</strong>
+                <div style="margin-top: calc(var(--spacing-unit) * 1);">
+                    ${item.is_correct ? '✅ Correct!' : '❌ Incorrect'}
+                </div>
+                ${!item.is_correct ? `<div style="margin-top: calc(var(--spacing-unit) * 1);">Correct answer: ${item.correct_answer}</div>` : ''}
+                ${item.explanation ? `<div style="margin-top: calc(var(--spacing-unit) * 1); font-style: italic; color: var(--text-secondary);">${item.explanation}</div>` : ''}
+            `;
+            detailsElement.appendChild(itemDiv);
+        });
+
+        document.getElementById('result-modal').classList.add('active');
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+    });
+</script>
+
+{% endblock %}
